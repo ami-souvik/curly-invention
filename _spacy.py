@@ -1,30 +1,28 @@
 import spacy
-import re
+from spacy.matcher import Matcher
 
-nlp = spacy.load("en_core_web_sm")
-# print(nlp._path)
-
-# doc = nlp("Add expense of 20 for Dinner on Swiggy")
-# for token in doc:
-#     print(token.text, token.pos_, token.dep_)
+nlp = spacy.load("en_core_web_lg")
 
 def extract_transaction_details(text):
     doc = nlp(text.lower())
 
-    # Extract amount using regex
-    amount_match = re.search(r'\b\d+\b', text)
-    amount = float(amount_match.group()) if amount_match else None
+    for token in doc:
+        print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
+            token.shape_, token.is_alpha, token.is_stop)
+    
+    matcher = Matcher(nlp.vocab)
 
-    # Extract category (assumes category is a noun)
-    categories = [token.text for token in doc if token.pos_ == "NOUN"]
-    category = categories[0] if categories else "Unknown"
+    # Add the patterns to the matcher
+    time_pattern = [{"POS": "NUM"}, {"DEP": "nummod"}]
+    matcher.add("TIME_PATTERN", [time_pattern])
 
-    return {
-        "section": "EXPENSE",
-        "amount": amount,
-        "category": category,
-        "note": text
-    }
+    matches = matcher(doc)
+    # Iterate over the matches
+    for match_id, start, end in matches:
+        # Get the matched span
+        matched_span = doc[start:end]
+        print(match_id, ":", matched_span.text)
 
-text = "Add expense of 20 for Dinner on Swiggy"
-print(extract_transaction_details(text))
+# text = "mar30,2025 __ paid to zepto debit %436"
+text = "mar 30,2025 __ paid to zepto debit %436"
+extract_transaction_details(text)
