@@ -3,7 +3,7 @@ from pdf2image import convert_from_path
 f = open("statement.txt", "w")
 
 # Replace 'input_file.pdf' with the path to your PDF file
-pdf_file = 'PhonePe_Statement_Mar2025_Mar2025.pdf'
+pdf_file = './dump/PhonePe_Statement_Mar2025_Mar2025.pdf'
 pages = convert_from_path(pdf_file)
 
 import pytesseract
