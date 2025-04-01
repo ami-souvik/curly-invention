@@ -1,24 +1,36 @@
 from pdf2image import convert_from_path
 
-f = open("statement.txt", "w")
+f = open("./dump/statement.txt", "w")
 
 # Replace 'input_file.pdf' with the path to your PDF file
-pdf_file = './dump/PhonePe_Statement_Mar2025_Mar2025.pdf'
+pdf_file = './dump/dummy.pdf'
 pages = convert_from_path(pdf_file)
+
+import cv2
+import numpy as np
+
+def extract_text_from_image(image):
+    # Preprocessing
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+    # Apply adaptive thresholding
+    thresh = cv2.adaptiveThreshold(gray, 255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY, 11, 2)
+
+    # Struggling with the '₹' symbol
+    custom_config = r"-c tessedit_char_whitelist='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.#-:/ '"
+    return pytesseract.image_to_string(thresh, lang='eng+hin', config=custom_config)
 
 import pytesseract
 
-def extract_text_from_image(image):
-    text = pytesseract.image_to_string(image)
-    return text
 
 # Create a list to store extracted text from all pages
 extracted_text = []
 
 for page in pages:
-    preprocessed_image = page
-
-    text = extract_text_from_image(preprocessed_image)
+    text = extract_text_from_image(np.array(page))
+    print(text)
     extracted_text.extend(text.split('\n'))
 
 import re
