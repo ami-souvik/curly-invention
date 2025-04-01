@@ -5,7 +5,7 @@ nlp = spacy.load("en_core_web_lg")
 
 def extract_transaction_details(text):
     doc = nlp(text.lower())
-
+    print("TEXT", "LEMMA", "POS", "TAG", "DEP", "SHAPE", "IS_ALPHA", "IS_STOP")
     for token in doc:
         print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
             token.shape_, token.is_alpha, token.is_stop)
@@ -13,8 +13,8 @@ def extract_transaction_details(text):
     matcher = Matcher(nlp.vocab)
 
     # Add the patterns to the matcher
-    time_pattern = [{"POS": "NUM"}, {"DEP": "nummod"}]
-    matcher.add("TIME_PATTERN", [time_pattern])
+    datetime_pattern = [{"SHAPE": "dd,dddd"}]
+    matcher.add("DATETIME_PATTERN", [datetime_pattern])
 
     matches = matcher(doc)
     # Iterate over the matches

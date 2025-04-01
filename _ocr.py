@@ -2,7 +2,7 @@ from pdf2image import convert_from_path
 
 # Replace 'input_file.pdf' with the path to your PDF file
 pdf_file = 'PhonePe_Statement_Mar2025_Mar2025.pdf'
-pages = convert_from_path(pdf_file)[:1]
+pages = convert_from_path(pdf_file)
 
 import cv2
 import numpy as np
@@ -45,23 +45,23 @@ for page in pages:
 
 print(extracted_text)
 
-import spacy
-from spacy.matcher import Matcher
+# import spacy
+# from spacy.matcher import Matcher
 
-nlp = spacy.load("en_core_web_sm")
+# nlp = spacy.load("en_core_web_sm")
 
-def extract_transaction_details(text):
-    doc = nlp(text.lower())
+# def extract_transaction_details(text):
+#     doc = nlp(text.lower())
 
-    matcher = Matcher(nlp.vocab)
+#     matcher = Matcher(nlp.vocab)
 
-    # Add the patterns to the matcher
-    expense_pattern = [{"LOWER": "expense"}, {"POS": "NOUN"}]
-    income_pattern = [{"LOWER": "income"}, {"POS": "NOUN"}]
-    matcher.add("SECTION_PATTERN", [expense_pattern, income_pattern])
+#     # Add the patterns to the matcher
+#     expense_pattern = [{"LOWER": "expense"}, {"POS": "NOUN"}]
+#     income_pattern = [{"LOWER": "income"}, {"POS": "NOUN"}]
+#     matcher.add("SECTION_PATTERN", [expense_pattern, income_pattern])
 
-    return doc.text
+#     return doc.text
 
-for line in extracted_text:
-    print(extract_transaction_details(line))
-    break
+# for line in extracted_text:
+#     print(extract_transaction_details(line))
+#     break
