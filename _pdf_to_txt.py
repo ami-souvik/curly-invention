@@ -19,7 +19,7 @@ def extract_text_from_image(image):
         cv2.THRESH_BINARY, 11, 2)
 
     # Struggling with the '₹' symbol
-    custom_config = r"-c tessedit_char_whitelist='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.#-:/ '"
+    custom_config = r"-c tessedit_char_whitelist='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,#-:/ '"
     return pytesseract.image_to_string(thresh, lang='eng+hin', config=custom_config)
 
 import pytesseract
@@ -100,7 +100,7 @@ Explaination:
 
 # ✅ March 30, 2025 / Mar 30, 2025 / Mar30,2025
 # ✅ 30 March 2025
-date_patterns = r"(?P<date>\b(?:\d{1,2}[-/ ]\d{1,2}[-/ ]\d{2,4}|\d{4}[-/ ]\d{1,2}[-/ ]\d{1,2}|[a-zA-Z]{3,9} \d{1,2},? \d{4})\b)"
+date_patterns = r"(?P<date>\b(?:\d{1,2}[-/ ]\d{1,2}[-/ ]\d{2,4}|\d{4}[-/ ]\d{1,2}[-/ ]\d{1,2}|[a-zA-Z]{3,9} ?\d{1,2},?.? ?\d{4})\b)"
 
 def parse_transaction(t):
     match = re.search(date_patterns, t)
@@ -108,7 +108,7 @@ def parse_transaction(t):
         return ''
     date = match.group("date")
     desc = t[match.span()[1]:]
-    return ",".join([date, desc]) + '\n'
+    return "\t".join([date, desc]) + '\n'
 
 for t in extracted_text:
     f.write(parse_transaction(t))
