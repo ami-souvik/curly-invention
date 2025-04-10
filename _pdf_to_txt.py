@@ -19,7 +19,7 @@ def extract_text_from_image(image):
         cv2.THRESH_BINARY, 11, 2)
 
     # Struggling with the '₹' symbol
-    custom_config = r"-c tessedit_char_whitelist='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,#-:/ '"
+    custom_config = r"-c tessedit_char_whitelist='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,#-:/ ₹'"
     return pytesseract.image_to_string(thresh, lang='eng+hin', config=custom_config)
 
 import pytesseract
@@ -30,7 +30,6 @@ extracted_text = []
 
 for page in pages:
     text = extract_text_from_image(np.array(page))
-    print(text)
     extracted_text.extend(text.split('\n'))
 
 import re
@@ -110,7 +109,38 @@ def parse_transaction(t):
     desc = t[match.span()[1]:]
     return "\t".join([date, desc]) + '\n'
 
+
+date_patterns = r"""
+(?P<date>
+    (?:
+        # Formats like DD-MM-YYYY, D/M/YYYY, etc.
+        (?P<day>\b(?:0?[1-9]|[12][0-9]|3[01]))[-/ ](?P<month>0?[1-9]|1[0-2])[-/ ](?P<year>19\d{2}|20\d{2})\b
+        |
+        # Formats like YYYY-MM-DD, YYYY/MM/DD
+        (?P<year_alt>\b(?:19\d{2}|20\d{2}))[-/ ](?P<month_alt>0?[1-9]|1[0-2])[-/ ](?P<day_alt>0?[1-9]|[12][0-9]|3[01])\b
+        |
+        # Formats like January 1, 2024 or Jan 1 2024
+        (?P<month_name>\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|
+            Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?))
+        [ ,]*(?P<day_name>0?[1-9]|[12][0-9]|3[01])[ ,]*(?P<year_name>19\d{2}|20\d{2})
+    )
+)
+"""
+
+def parse_transaction_v2(t):
+    matches = re.finditer(date_patterns, t, re.VERBOSE)
+    for match in matches:
+        # date = match.group("date")
+        # print("Full Match:", date)
+        day = match.group("day") or match.group("day_alt") or match.group("day_name")
+        month = match.group("month") or match.group("month_alt") or match.group("month_name")
+        year = match.group("year") or match.group("year_alt") or match.group("year_name")
+        # print(f"Parsed - Day: {day}, Month: {month}, Year: {year}")
+        desc = t[match.span()[1]:]
+        return "\t".join([f"{day} {month}, {year}", desc]) + '\n'
+    return ''
+
 for t in extracted_text:
-    f.write(parse_transaction(t))
+    f.write(parse_transaction_v2(t))
 
 f.close()
